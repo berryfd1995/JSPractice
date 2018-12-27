@@ -5,6 +5,9 @@ document.head.appendChild(imported);
 var imported = document.createElement('script');
 imported.src = './Process/Blend.js';
 document.head.appendChild(imported);
+var imported = document.createElement('script');
+imported.src = './Process/Rain.js';
+document.head.appendChild(imported);
 class ImageProcesser{
   constructor(ocanvas, pcanvas,img){
     this.ocanvas = ocanvas;
@@ -12,8 +15,8 @@ class ImageProcesser{
     this.pcanvas = pcanvas;
     this.pctx = pcanvas.getContext("2d");
     this.img = img;
-    this.processClass = new Blend();
-    this.setFPS(5);
+    this.setProcessMode(1);
+    this.setFPS(60);
     this.octx.drawImage(this.img,0,0);
     this.pctx.drawImage(this.img,0,0);
   }
@@ -23,9 +26,10 @@ class ImageProcesser{
     this.frameCounter = 0;
     this.keepProcessing = true;
     this.pixelArray = this.getPixelArray(this.imgData);
-    this.processClass.setPixelArray(this.pixelArray);
-    this.processClass.setImgData(this.imgData);
+    this.processClass.pixelArray = this.pixelArray;
+    this.processClass.imgData = this.imgData;
     //this.start(imgData,0);
+    this.processClass.init();
     this.startProcess();
   }
 
@@ -33,8 +37,9 @@ async startProcess(){
   if(this.keepProcessing){
     if(++this.frameCounter % this.fps == 0){
       this.frameCounter = 0;
-      console.log("Called process");
-      await this.processClass.process(this.updateImgData.bind(this), this.endProcess.bind(this));
+      if(await this.processClass.process(this.updateImgData.bind(this), this.endProcess.bind(this))){
+        this.endProcess();
+      }
     }
     requestAnimationFrame(function(){
       this.startProcess();
@@ -47,7 +52,10 @@ setProcessMode(mode){
       this.processClass = new Blend();
       break;
     case 2:
-      this.processClass = new Sprial();
+      this.processClass = new Spiral();
+      break;
+    case 3:
+      this.processClass = new Rain();
       break;
     default:
       this.processClass = new  Blend();
@@ -58,18 +66,25 @@ setProcessMode(mode){
 endProcess(){
   this.keepProcessing = false;
   console.log("Finished processing image");
+
 }
 
 setFPS(fps){
   this.fps = Math.floor(60/fps);
 }
-
+samePixelData(pixel, index){
+  return(pixel.red === this.imgData.data[index]
+    && pixel.green === this.imgData.data[index+1]
+    && pixel.blue === this.imgData.data[index+2]
+    && pixel.alpha === this.imgData.data[index+3]);
+}
 getPixelArray(imgData){
   let parr = [];
   for(let row = 0; row < this.pcanvas.height; row++){
     let rowArr = [];
+    let rIndex = row*(this.pcanvas.width*4);
     for(let column = 0; column < this.pcanvas.width*4; column+= 4){
-      let i = (row*(this.pcanvas.width*4)) + column;
+      let i = rIndex + column;
       let pixel = {
         val: 0,
         red: imgData.data[i],
@@ -83,25 +98,19 @@ getPixelArray(imgData){
   }
   return parr;
 }
-samePixelData(pixel, index){
-  return(pixel.red === this.imgData.data[index]
-    && pixel.green === this.imgData.data[index+1]
-    && pixel.blue === this.imgData.data[index+2]
-    && pixel.alpha === this.imgData.data[index+3]);
-}
+
 updateImgData(){
   //make changes to imgdata.data array
-  console.log(this.pixelArray);
-
-  for(let i = 0; i < this.pixelArray.length; i++){
-    for(let j = 0; j < this.pixelArray[i].length; j++){
-      let index = (i*(this.pixelArray[i].length))+(j*4);
-      let pixel = this.pixelArray[i][j];
+  for(let row = 0; row < this.pixelArray.length; row++){
+    let rIndex = row*(this.pixelArray[row].length *4);
+    for(let column = 0; column < this.pixelArray[row].length; column++){
+      let index = rIndex+(column*4);
+      let pixel = this.pixelArray[row][column];
       if(!this.samePixelData(pixel, index)){
-        this.imgData.data[index] = this.pixelArray[i][j].red;
-        this.imgData.data[index+1] =this.pixelArray[i][j].green;
-        this.imgData.data[index+2] =this.pixelArray[i][j].blue;
-        this.imgData.data[index+3] =this.pixelArray[i][j].alpha;
+        this.imgData.data[index] = pixel.red;
+        this.imgData.data[index+1] = pixel.green;
+        this.imgData.data[index+2] = pixel.blue;
+        this.imgData.data[index+3] = pixel.alpha;
       }
     }
   }

@@ -1,25 +1,21 @@
 class Blend{
   constructor(){
-
+    this.row = 0;
   }
-
-  setPixelArray(pixelArray){
-    this.pixelArray = pixelArray;
+  init(){
+    
   }
+  process(callback){
+    if(this.row < this.pixelArray.length){
+      let rowArray = this.pixelArray[this.row];
+      let sortedRow = this.blend(rowArray);
+      this.pixelArray[this.row] = sortedRow;
 
-  setImgData(imgData){
-    this.imgData = imgData;
-  }
-
-  process(callback, callback2){
-    console.log("called");
-    for(let i = 0; i < this.pixelArray[0].length; i++){
-      let pixel = this.pixelArray[0][i];
-      pixel.red = 0;
-      pixel.green = 0;
+      callback();
+      this.row++;
+    }else{
+      return true;
     }
-    callback();
-    callback2();
   }
 
   blend(arr){
