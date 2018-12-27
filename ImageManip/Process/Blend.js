@@ -11,8 +11,15 @@ class Blend{
     this.imgData = imgData;
   }
 
-  process(callback){
+  process(callback, callback2){
+    console.log("called");
+    for(let i = 0; i < this.pixelArray[0].length; i++){
+      let pixel = this.pixelArray[0][i];
+      pixel.red = 0;
+      pixel.green = 0;
+    }
     callback();
+    callback2();
   }
 
   blend(arr){
