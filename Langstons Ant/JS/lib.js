@@ -19,7 +19,7 @@ window.onload = function() {
   output.innerHTML = slider.value;
   slider.oninput = function(){
     output.innerHTML = this.value;
-    game.setFPS(4000);
+    game.setFPS(5000);
   }
 };
 function pauseGame(){

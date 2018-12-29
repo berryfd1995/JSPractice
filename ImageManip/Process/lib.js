@@ -26,6 +26,6 @@ function processImage(){
   imgCanvas = document.getElementById('origin');
   processedCanvas = document.getElementById('remake');
   imgProcessor = new ImageProcesser(imgCanvas, processedCanvas,img);
-  imgProcessor.setProcessMode(3);
+  imgProcessor.setProcessMode(4);
   imgProcessor.process();
 }

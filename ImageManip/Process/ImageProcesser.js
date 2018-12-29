@@ -8,6 +8,9 @@ document.head.appendChild(imported);
 var imported = document.createElement('script');
 imported.src = './Process/Rain.js';
 document.head.appendChild(imported);
+var imported = document.createElement('script');
+imported.src = './Process/Block.js';
+document.head.appendChild(imported);
 class ImageProcesser{
   constructor(ocanvas, pcanvas,img){
     this.ocanvas = ocanvas;
@@ -15,7 +18,7 @@ class ImageProcesser{
     this.pcanvas = pcanvas;
     this.pctx = pcanvas.getContext("2d");
     this.img = img;
-    this.setProcessMode(1);
+    this.setProcessMode(4);
     this.setFPS(60);
     this.octx.drawImage(this.img,0,0);
     this.pctx.drawImage(this.img,0,0);
@@ -56,6 +59,9 @@ setProcessMode(mode){
       break;
     case 3:
       this.processClass = new Rain();
+      break;
+    case 4:
+      this.processClass = new Block();
       break;
     default:
       this.processClass = new  Blend();

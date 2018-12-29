@@ -22,6 +22,14 @@ class Ant{
     this.boxHeight = height;
     //create world
     this.world =new Array(this.canvasHeight/height).fill(0).map(() => new Array(this.canvasWidth/width).fill(0));
+    for(let r = 0; r < this.world.length; r++){
+      for(let c = 0; c < this.world[r].length; c++){
+        let bool = Math.random() >= 0.98;
+        if(bool){
+          this.world[r][c] = 1;
+        }
+      }
+    }
     this.setAnt();
     this.drawBoard();
   }
@@ -51,12 +59,12 @@ class Ant{
     this.fps = Math.floor(60/frames);
   }
 
-  gameLoop(){
+  async gameLoop(){
     if(!this.pause){
       if(++this.frameCounter % this.fps == 0){
         this.frameCounter = 0;
         for(let i = 0; i < this.repeat; i++){
-          this.applyGeneration();
+           await this.applyGeneration();
         }
       }
       this.drawBoard();
@@ -64,7 +72,7 @@ class Ant{
     }
   }
 
-  applyGeneration(){
+  async applyGeneration(){
     //if cell id white, flip color, move to the right
     if(this.world[this.antRow][this.antColumn] === 0){
       this.world[this.antRow][this.antColumn] = 1;
