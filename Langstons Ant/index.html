@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" href="./index.css">
+  </head>
+  <body>
+    <script src="./JS/lib.js"></script>
+    <div id="root">
+      <canvas id="game" width="500" height="500"></canvas>
+      <br>
+      <button type="button" onclick="regenerate()">Regenerate</button>
+      <button type="button" onclick="startGame()">Start</button>
+      <button type="button" onclick="pauseGame()">Pause</button>
+      <div class="slidecontainer">
+        <input type="range" min="1" max="60" value="10" class="slider" step="1" id="fpsrange">
+        <label id="fpsvalue"></label>
+      </div>
+      <img id="img" src="./JS/ant.svg" style="display:none"/>
+      <p id="info"></p>
+    </div>
+
+  </body>
+</html>
