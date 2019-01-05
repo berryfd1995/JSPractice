@@ -1,6 +1,6 @@
 class Block{
   constructor(){
-    this.bEdge = 50;
+    this.bEdge = 10;
     this.row = 0;
   }
   init(){
