@@ -69,7 +69,7 @@ startBow(event){
   this.x -= canvas.offsetLeft;
   this.y -= canvas.offsetTop;
   console.log("x:" + this.x + " y:" + this.y);
-  this.canvas.addEventListener("mousemove", this.pullBow, false);
+  this.canvas.addEventListener("mousemove", this.pullBo w, false);
  }
 
 
