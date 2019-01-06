@@ -1,0 +1,12 @@
+#root{
+  text-align: center;
+}
+canvas{
+  border-color: black;
+  border-radius: 1px;
+  border-style: solid;
+}
+body{
+  background-image: url('/Sprites/websiteBG.jpg');
+  
+}
