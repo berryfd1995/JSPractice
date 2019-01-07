@@ -9,6 +9,12 @@ window.onload = function() {
   this.canvas = document.getElementById('game');
   this.game = new Game(canvas);
 };
+function startGame(){
+  this.game.startGame();
+}
+function nextRound(){
+  this.game.nextRound();
+}
 /*document.addEventListener("keypress", function(event){
   //w = 119
   //a = 97

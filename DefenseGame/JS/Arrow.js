@@ -30,7 +30,6 @@ class Arrow{
     }
     updateCords(){
       this.velY += this.gravity;
-      console.log(this.velX);
       this.p2.x += this.velX;
       this.p2.y += this.velY;
 

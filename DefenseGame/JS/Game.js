@@ -1,10 +1,14 @@
 var imported = document.createElement('script');
 imported.src = './JS/Arrow.js';
 document.head.appendChild(imported);
+var imported = document.createElement('script');
+imported.src = './JS/Monster.js';
+document.head.appendChild(imported);
 class Game{
   constructor(canvas){
     this.canvas = canvas;
     this.pullBow = this.pullBow.bind(this);
+    this.inProgress = false;
     this.ctx = canvas.getContext('2d');
     this.loadSprites();
     this.setupGame();
@@ -13,58 +17,103 @@ class Game{
     canvas.addEventListener("mousedown", this.startBow.bind(this), false);
     canvas.addEventListener ("mouseout", this.removeEvent.bind(this), false);
     canvas.addEventListener("mouseup", this.releaseBow.bind(this), false);
-    this.startGame();
   }
 
   startGame(){
-    this.pause = false;
-    this.gameLoop();
-  }
-
-
-  gameLoop(){
-    if(!this.pause){
-
-    }
-    this.drawGame();
-    this.writeStats();
-    requestAnimationFrame(this.gameLoop.bind(this));
-  }
-
-  removeArrow(arrow){
-    var index = this.arrowList.indexOf(arrow);
-    if (index > -1) {
-      this.arrowList.splice(index, 1);
-      console.log("removed arrow");
+    if(!this.inProgress){
+      console.log("called");
+      this.pause = false;
+      this.fpscounter = 0;
+      this.maxMonsters = 1;
+      this.maxAlive = 1;
+      this.currentMonsters = 0;
+      this.totalSpawned = 0;
+      this.intermission = false;
+      this.ended = false;
+      this.gameLoop();
     }
   }
+  /*===========================Setup ==============================*/
   setupGame(){
     this.wave = 0;
     this.points = 0;
+    this.health = 250;
     this.arrowList = [];
+    this.monsterList =[];
   }
 
   loadSprites(){
     this.background = document.getElementById("background");
   }
-  getPower(){
-    return 2*Math.sqrt(Math.pow(this.v1,2) + Math.pow(this.v2,2));
+  /*===========================Core ==============================*/
+
+  gameLoop(){
+    if(++this.fpscounter % 5 == 0){
+      this.fpscounter = 0;
+      if(!this.pause){
+        this.startWave();
+      }
+      this.drawGame();
+      this.writeStats();
+    }
+    if(!this.ended){
+      requestAnimationFrame(this.gameLoop.bind(this));
+      this.ended = false;
+    }
   }
-  shootBow(){
-    let p1 = {x:this.x2, y:this.y2};
-    let p2 = {x:70, y:210};
-    let arrow = new Arrow(this.canvas,this.ctx,p1,p2);
-    arrow.remove = this.removeArrow.bind(this);
-    this.arrowList.push(arrow);
-    this.v1 =0;
-    this.v2 = 0;
-    this.x2 = 0;
-    this.y2 = 0;
+
+  startWave(){
+    if(!this.inProgress && !this.intermission){
+        this.wave++;
+        this.inProgress = true;
+        this.intermission = false;
+    }else if(this.inProgress && !this.intermission){
+      if(this.currentMonsters < this.maxAlive && this.totalSpawned < this.maxMonsters){
+        this.spawnMonster();
+      }else if(this.totalSpawned == this.maxMonsters && this.currentMonsters == 0){
+        this.inProgress = false;
+        this.intermission = true;
+      }
+      for(let i = 0; i < this.monsterList.length; i++){
+        let m = this.monsterList[i];
+        m.tick();
+      }
+    }
   }
+  nextRound(){
+    if(!this.inProgress && !this.pause){
+      this.inProgress = false;
+      this.intermission = false;
+      //Calculate next round stats
+    }
+  }
+  spawnMonster(){
+    this.currentMonsters++;
+    this.totalSpawned++;
+    let monster = new Monster(this.canvas, this.ctx);
+    monster.damage = this.attackTower.bind(this);
+    this.monsterList.push(monster);
+  }
+
+  attackTower(amt){
+    this.health -= amt;
+    if(this.health < 0){
+      this.setupGame();
+      this.ended = true;
+      this.inProgress = false;
+      this.intermission = false;
+      this.pause = false;
+      this.currentMonsters = 0
+    }
+  }
+  /*===========================Animations==============================*/
+
+
   drawGame(){
     this.ctx.drawImage(this.background, 0, 0, this.canvas.width, this.canvas.height);
     this.drawAim();
     this.drawArrows();
+    this.drawMonseters();
   }
 
   drawArrows(){
@@ -73,7 +122,12 @@ class Game{
       arrow.drawArrow();
     }
   }
-
+  drawMonseters(){
+    for(let i = 0; i < this.monsterList.length; i++){
+      let m = this.monsterList[i];
+      m.draw();
+    }
+  }
   drawAim(){
     if(this.attached){
       this.ctx.beginPath();
@@ -98,11 +152,32 @@ class Game{
     this.ctx.font = "30px Arial";
     this.ctx.textAlign ="center";
     this.ctx.fillText("Wave: " + this.wave, Math.floor(this.canvas.width/2), 35);
+    this.ctx.fillText("Health: " + this.health, Math.floor(this.canvas.width/2), 100);
   }
 
 
   /*===========================Bow Listeners==============================*/
+  getPower(){
+    return 2*Math.sqrt(Math.pow(this.v1,2) + Math.pow(this.v2,2));
+  }
+  shootBow(){
+    let p1 = {x:this.x2, y:this.y2};
+    let p2 = {x:70, y:210};
+    let arrow = new Arrow(this.canvas,this.ctx,p1,p2);
+    arrow.remove = this.removeArrow.bind(this);
+    this.arrowList.push(arrow);
+    this.v1 =0;
+    this.v2 = 0;
+    this.x2 = 0;
+    this.y2 = 0;
+  }
 
+  removeArrow(arrow){
+    var index = this.arrowList.indexOf(arrow);
+    if (index > -1) {
+      this.arrowList.splice(index, 1);
+    }
+  }
 
   removeEvent(){
     if(this.attached){
