@@ -40,6 +40,9 @@ class Game{
     this.health = 250;
     this.arrowList = [];
     this.monsterList =[];
+    var d = new Date();
+    var n = d.getTime();
+    this.nextSpawnTime = n;
   }
 
   loadSprites(){
@@ -69,7 +72,12 @@ class Game{
         this.intermission = false;
     }else if(this.inProgress && !this.intermission){
       if(this.currentMonsters < this.maxAlive && this.totalSpawned < this.maxMonsters){
-        this.spawnMonster();
+        var d = new Date();
+        var n = d.getTime();
+        if(n > this.nextSpawnTime){
+          this.nextSpawnTime = n + 4000;
+          this.spawnMonster();
+        }
       }else if(this.totalSpawned == this.maxMonsters && this.currentMonsters == 0){
         this.inProgress = false;
         this.intermission = true;
@@ -78,21 +86,30 @@ class Game{
         let m = this.monsterList[i];
         m.tick();
       }
+      this.checkForHits();
     }
   }
   nextRound(){
     if(!this.inProgress && !this.pause){
       this.inProgress = false;
       this.intermission = false;
-      //Calculate next round stats
+      this.maxMonsters *=2;
+      this.totalSpawned = 0;
+      this.maxAlive++;
     }
   }
   spawnMonster(){
     this.currentMonsters++;
     this.totalSpawned++;
     let monster = new Monster(this.canvas, this.ctx);
+    monster.remove = this.removeMonster.bind(this);
     monster.damage = this.attackTower.bind(this);
     this.monsterList.push(monster);
+  }
+  getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   attackTower(amt){
@@ -106,6 +123,32 @@ class Game{
       this.currentMonsters = 0
     }
   }
+  checkForHits(){
+    for(let i =0; i < this.arrowList.length; i++){
+      let arrow = this.arrowList[i];
+      if(!arrow.outOfBounds){
+        for(let j = 0; j < this.monsterList.length; j++){
+            let m = this.monsterList[j];
+            if(arrow.p2.x > m.x && arrow.p2.x < m.x + 40){
+              if(arrow.p2.y > m.y && arrow.p2.y < m.y + 70){
+                arrow.outOfBounds = true;
+                arrow.removeArrow(100);
+                m.hurt(25);
+              }
+            }
+        }
+      }
+    }
+  }
+  removeMonster(m){
+    var index = this.monsterList.indexOf(m);
+    if (index > -1) {
+      this.monsterList.splice(index, 1);
+      this.currentMonsters--;
+
+    }
+  }
+
   /*===========================Animations==============================*/
 
 
@@ -114,6 +157,7 @@ class Game{
     this.drawAim();
     this.drawArrows();
     this.drawMonseters();
+    this.drawHealth();
   }
 
   drawArrows(){
@@ -127,6 +171,16 @@ class Game{
       let m = this.monsterList[i];
       m.draw();
     }
+  }
+  drawHealth(){
+    this.ctx.strokeRect(15,90,110,20);
+    let amt = this.health/250;
+    amt *= 110;
+    this.ctx.fillStyle = "red";
+    this.ctx.fillRect(16,91,amt-2,18);
+    this.ctx.fillStyle = "black";
+    this.ctx.font = "12px Arial";
+    this.ctx.fillText(this.health + "/250",50, 105);
   }
   drawAim(){
     if(this.attached){
@@ -152,7 +206,6 @@ class Game{
     this.ctx.font = "30px Arial";
     this.ctx.textAlign ="center";
     this.ctx.fillText("Wave: " + this.wave, Math.floor(this.canvas.width/2), 35);
-    this.ctx.fillText("Health: " + this.health, Math.floor(this.canvas.width/2), 100);
   }
 
 

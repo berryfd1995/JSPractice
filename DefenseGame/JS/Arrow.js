@@ -49,12 +49,12 @@ class Arrow{
     checkBounds(){
       if(this.p2.x > this.canvas.width && this.p1.x > this.canvas.width){
         this.outOfBounds = true;
-        this.removeArrow();
+        this.removeArrow(5000);
       }else if(this.p2.y> this.canvas.height-50 ){
         this.outOfBounds = true;
-        this.removeArrow();
+        this.removeArrow(5000);
       }else if(this.p2.x < 0){
-        this.removeArrow();
+        this.removeArrow(5000);
         this.outOfBounds = true;
       }
     }
@@ -63,8 +63,8 @@ class Arrow{
       return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async  removeArrow() {
-      await this.sleep(5000);
+    async  removeArrow(ms) {
+      await this.sleep(ms);
       this.remove(this);
     }
 }
