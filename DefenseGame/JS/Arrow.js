@@ -1,57 +1,71 @@
 class Arrow{
-    constructor(canvas,ctx,x1, y1, x2, y2){
+    constructor(canvas,ctx,p1, p2){
       this.canvas = canvas;
       this.ctx = ctx;
-      this.x1 = x1;
-      this.y1 = y1;
-      this.x2 = x2;
-      this.y2 = y2;
-      this.outOfBounds = false;
-      this.power = this.getPower();
-      this.direction = this.getDirection();
+      this.p1 = p1;
+      this.p2 = p2;
+      this.gravity = .4;
+      this.setup();
     }
-
-
+    setup(){
+      this.speed = this.distance()/2.8;
+      this.velX = (Math.cos(this.getAngle())*this.speed);
+      this.velY = (Math.sin(this.getAngle())*this.speed);
+    }
+    getAngle(){
+      return  Math.atan2(this.p2.y-this.p1.y, this.p2.x-this.p1.x);
+    }
+    distance(){
+      return Math.sqrt(Math.pow(this.p2.x-this.p1.x,2) + Math.pow(this.p2.y-this.p1.y,2));
+    }
     drawArrow(){
-      this.ctx.beginPath();
       if(!this.outOfBounds){
         this.checkBounds();
-        this.x1 +=2;
-        this.x2 +=2;
-        this.y1 +=2;
-        this.y2 +=2;
+        this.updateCords();
       }
-      this.ctx.moveTo(this.x1, this.y1);
-      this.ctx.lineTo(this.x2, this.y2);
+      this.ctx.beginPath();
+      this.ctx.moveTo(this.p2.x, this.p2.y);
+      this.ctx.lineTo(this.p1.x, this.p1.y);
       this.ctx.stroke();
     }
+    updateCords(){
+      this.velY += this.gravity;
+      console.log(this.velX);
+      this.p2.x += this.velX;
+      this.p2.y += this.velY;
 
-
+      this.p1.x = this.p2.x + this.getVector().x;
+      this.p1.y = this.p2.y + this.getVector().y;
+    }
+    getVector(){
+      let x = this.p1.x - this.p2.x;
+      let y = this.p1.y - this.p2.y;
+      let mag = Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
+      x = x / mag;
+      y = y / mag;
+      x *= 25;
+      y *= 25;
+      return {x: x, y: y};
+    }
     checkBounds(){
-      if(this.x1 > this.canvas.width && this.x2 > this.canvas.width){
+      if(this.p2.x > this.canvas.width && this.p1.x > this.canvas.width){
         this.outOfBounds = true;
         this.removeArrow();
-      }else if(this.y1> this.canvas.height-50 ){
+      }else if(this.p2.y> this.canvas.height-50 ){
         this.outOfBounds = true;
         this.removeArrow();
+      }else if(this.p2.x < 0){
+        this.removeArrow();
+        this.outOfBounds = true;
       }
     }
 
-    getPower(){
-
-    }
-
-    getDirection(){
-
-    }
     sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-  async  removeArrow() {
-    await this.sleep(5000);
-    this.remove(this);
-  }
-
-
+    async  removeArrow() {
+      await this.sleep(5000);
+      this.remove(this);
+    }
 }

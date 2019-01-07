@@ -8,7 +8,7 @@ class Snake{
     this.canvasHeight = canvas.height;
     this.ctx = canvas.getContext("2d");
     this.boxWidth = 25;
-    this.boxHeight = 25;
+    this.boxHeight = 5;
     this.setupGame();
   }
 
